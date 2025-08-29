@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SG-001 D-Mail Sender</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="sg-console">
+    <h1>SG-001 D-Mail Sender</h1>
+    <div class="dmail-container">
+        <form id="dmailForm">
+            <input type="text" id="recipient" placeholder="Recipient" required>
+            <textarea id="message" placeholder="Type your D-Mail..." rows="4" required></textarea>
+            <label for="timestamp">Set Timestamp:</label>
+            <input type="datetime-local" id="timestamp">
+            <button type="submit">Send D-Mail</button>
+        </form>
+    </div>
+    <div id="status"></div>
+    <a href="view.html" class="back-link">Go to Inbox</a>
+</div>
+<script src="send.js"></script>
+</body>
+</html>
