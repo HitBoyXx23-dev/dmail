@@ -18,25 +18,31 @@ function renderMessages(){
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// Simulate auto-reply with time-travel animation
-function simulateReply(){
+// Simulate auto-reply only for messages that haven't been replied to
+function simulateReplies(){
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
-    const lastSent = dmails.filter(m => m.type==="sent").slice(-1)[0];
-    if(!lastSent) return;
 
-    setTimeout(() => {
-        const reply = {
-            recipient: "You",
-            message: `Reply from ${lastSent.recipient}: I received your D-Mail!`,
-            timestamp: new Date().toLocaleString(),
-            type: "received"
-        };
-        const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
-        dmails.push(reply);
-        localStorage.setItem("dmails", JSON.stringify(dmails));
-        renderMessages();
-    }, 1500);
+    dmails.forEach((msg, index) => {
+        if(msg.type === "sent" && !msg.replied){
+            // Mark as replied to prevent duplicate replies
+            dmails[index].replied = true;
+            localStorage.setItem("dmails", JSON.stringify(dmails));
+
+            setTimeout(() => {
+                const reply = {
+                    recipient: "You",
+                    message: `Reply from ${msg.recipient}: I received your D-Mail!`,
+                    timestamp: new Date().toLocaleString(),
+                    type: "received"
+                };
+                const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
+                dmailsNow.push(reply);
+                localStorage.setItem("dmails", JSON.stringify(dmailsNow));
+                renderMessages();
+            }, 1500);
+        }
+    });
 }
 
 renderMessages();
-simulateReply();
+simulateReplies();
