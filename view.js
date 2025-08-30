@@ -1,12 +1,16 @@
 const chatWindow = document.getElementById("chatWindow");
 const clearBtn = document.getElementById("clearBtn");
 
-let lastSentCount = 0;
-
 // Initialize storage only if empty
 if (!localStorage.getItem("dmails")) {
     localStorage.setItem("dmails", JSON.stringify([]));
 }
+
+// Track how many sent messages have been processed
+let lastSentCount = (() => {
+    const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
+    return dmails.filter(m => m.type === "sent").length;
+})();
 
 function renderMessages() {
     chatWindow.innerHTML = "";
@@ -55,7 +59,7 @@ function simulateReplies() {
     lastSentCount = sentMessages.length;
 }
 
-// Clear button with fade-out
+// Clear button with fade-out animation
 clearBtn.addEventListener("click", () => {
     const messages = document.querySelectorAll(".message");
     messages.forEach(msg => {
@@ -65,7 +69,7 @@ clearBtn.addEventListener("click", () => {
     setTimeout(() => {
         localStorage.setItem("dmails", JSON.stringify([]));
         renderMessages();
-        lastSentCount = 0;
+        lastSentCount = 0; // Reset after clearing
     }, 500);
 });
 
