@@ -15,7 +15,6 @@ function renderMessages() {
         const div = document.createElement("div");
         div.classList.add("message", dmail.type);
 
-        // Add the time-travel animation only for new messages
         if (!dmail.animated) {
             div.classList.add("animate");
             dmails[index].animated = true;
@@ -42,7 +41,7 @@ function simulateReplies() {
                 message: `Reply to ${msg.recipient}: I received your D-Mail!`,
                 timestamp: new Date().toLocaleString(),
                 type: "received",
-                animated: false // mark for animation
+                animated: false
             };
             const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
             dmailsNow.push(reply);
@@ -54,11 +53,12 @@ function simulateReplies() {
     lastSentCount = sentMessages.length;
 }
 
-// Automatically clear all D-Mails after 2 minutes (120,000 ms)
-setTimeout(() => {
+// Button to clear D-Mails manually
+const clearBtn = document.getElementById("clearBtn");
+clearBtn.addEventListener("click", () => {
     localStorage.setItem("dmails", JSON.stringify([]));
     renderMessages();
-}, 120000); // 2 minutes
+});
 
 renderMessages();
 simulateReplies();
