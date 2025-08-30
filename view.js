@@ -10,33 +10,36 @@ function renderMessages() {
     chatWindow.innerHTML = "";
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
 
+    // Sort by timestamp
     dmails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     dmails.forEach((dmail, index) => {
         const div = document.createElement("div");
         div.classList.add("message", dmail.type);
 
+        // Only add animate class if not already animated
         if (!dmail.animated) {
             div.classList.add("animate");
             dmails[index].animated = true;
-            localStorage.setItem("dmails", JSON.stringify(dmails));
         }
 
         div.innerHTML = `<strong>${dmail.recipient}:</strong> ${dmail.message}<br><em>${dmail.timestamp}</em>`;
         chatWindow.appendChild(div);
     });
 
+    localStorage.setItem("dmails", JSON.stringify(dmails));
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// Only reply once per sent message using a 'replied' flag
+// Reply simulation
 function simulateReplies() {
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
+    let updated = false;
 
     dmails.forEach((msg, index) => {
         if (msg.type === "sent" && !msg.replied) {
             dmails[index].replied = true;
-            localStorage.setItem("dmails", JSON.stringify(dmails));
+            updated = true;
 
             setTimeout(() => {
                 const reply = {
@@ -53,9 +56,13 @@ function simulateReplies() {
             }, 1500);
         }
     });
+
+    if (updated) {
+        localStorage.setItem("dmails", JSON.stringify(dmails));
+    }
 }
 
-// Clear D-Mails with fade-out animation
+// Clear messages with fade-out
 clearBtn.addEventListener("click", () => {
     const messages = document.querySelectorAll(".message");
     messages.forEach(msg => {
@@ -68,7 +75,7 @@ clearBtn.addEventListener("click", () => {
     }, 500);
 });
 
-// Initial render and periodic reply check
+// Initial load
 renderMessages();
 simulateReplies();
 setInterval(simulateReplies, 2000);
