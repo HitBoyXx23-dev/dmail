@@ -12,12 +12,11 @@ function renderMessages() {
 
     dmails.forEach(dmail => {
         const div = document.createElement("div");
-        div.classList.add("message", dmail.type, "fadeIn"); // fade-in effect
+        div.classList.add("message", dmail.type, "animate"); // <-- cyberpunk entry effect
         div.innerHTML = `<strong>${dmail.recipient}:</strong> ${dmail.message}<br><em>${dmail.timestamp}</em>`;
         chatWindow.appendChild(div);
     });
 
-    // Always scroll to bottom
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
@@ -50,11 +49,11 @@ function simulateReplies() {
     }
 }
 
-// Clear messages with fade-out animation
+// Clear messages with cyberpunk fade-out
 clearBtn.addEventListener("click", () => {
     const messages = document.querySelectorAll(".message");
     messages.forEach(msg => {
-        msg.classList.add("fadeOut");
+        msg.style.animation = "fadeOut 0.5s forwards";
     });
 
     setTimeout(() => {
