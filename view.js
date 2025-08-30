@@ -6,12 +6,6 @@ if (!localStorage.getItem("dmails")) {
     localStorage.setItem("dmails", JSON.stringify([]));
 }
 
-// Track how many sent messages have been processed
-let lastSentCount = (() => {
-    const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
-    return dmails.filter(m => m.type === "sent").length;
-})();
-
 function renderMessages() {
     chatWindow.innerHTML = "";
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
@@ -35,31 +29,33 @@ function renderMessages() {
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
+// Only reply once per sent message using a 'replied' flag
 function simulateReplies() {
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
-    const sentMessages = dmails.filter(m => m.type === "sent");
-    const newMessages = sentMessages.slice(lastSentCount);
 
-    newMessages.forEach(msg => {
-        setTimeout(() => {
-            const reply = {
-                recipient: "You",
-                message: `Reply to ${msg.recipient}: I received your D-Mail!`,
-                timestamp: new Date().toLocaleString(),
-                type: "received",
-                animated: false
-            };
-            const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
-            dmailsNow.push(reply);
-            localStorage.setItem("dmails", JSON.stringify(dmailsNow));
-            renderMessages();
-        }, 1500);
+    dmails.forEach((msg, index) => {
+        if (msg.type === "sent" && !msg.replied) {
+            dmails[index].replied = true;
+            localStorage.setItem("dmails", JSON.stringify(dmails));
+
+            setTimeout(() => {
+                const reply = {
+                    recipient: "You",
+                    message: `Reply to ${msg.recipient}: I received your D-Mail!`,
+                    timestamp: new Date().toLocaleString(),
+                    type: "received",
+                    animated: false
+                };
+                const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
+                dmailsNow.push(reply);
+                localStorage.setItem("dmails", JSON.stringify(dmailsNow));
+                renderMessages();
+            }, 1500);
+        }
     });
-
-    lastSentCount = sentMessages.length;
 }
 
-// Clear button with fade-out animation
+// Clear D-Mails with fade-out animation
 clearBtn.addEventListener("click", () => {
     const messages = document.querySelectorAll(".message");
     messages.forEach(msg => {
@@ -69,10 +65,10 @@ clearBtn.addEventListener("click", () => {
     setTimeout(() => {
         localStorage.setItem("dmails", JSON.stringify([]));
         renderMessages();
-        lastSentCount = 0; // Reset after clearing
     }, 500);
 });
 
+// Initial render and periodic reply check
 renderMessages();
 simulateReplies();
 setInterval(simulateReplies, 2000);
