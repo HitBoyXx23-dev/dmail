@@ -17,7 +17,7 @@ function renderMessages() {
         const div = document.createElement("div");
         div.classList.add("message", dmail.type);
 
-        // Only add animate class if not already animated
+        // Apply animation only once
         if (!dmail.animated) {
             div.classList.add("animate");
             dmails[index].animated = true;
@@ -27,42 +27,46 @@ function renderMessages() {
         chatWindow.appendChild(div);
     });
 
+    // Save updated "animated" states
     localStorage.setItem("dmails", JSON.stringify(dmails));
+
+    // Always scroll to bottom
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
 // Reply simulation
 function simulateReplies() {
-    const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
-    let updated = false;
+    let dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
+    let needsUpdate = false;
 
     dmails.forEach((msg, index) => {
         if (msg.type === "sent" && !msg.replied) {
             dmails[index].replied = true;
-            updated = true;
+            needsUpdate = true;
 
             setTimeout(() => {
-                const reply = {
+                // Always fetch the latest messages before adding a reply
+                let latest = JSON.parse(localStorage.getItem("dmails") || "[]");
+                latest.push({
                     recipient: "You",
                     message: `Reply to ${msg.recipient}: I received your D-Mail!`,
                     timestamp: new Date().toLocaleString(),
                     type: "received",
                     animated: false
-                };
-                const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
-                dmailsNow.push(reply);
-                localStorage.setItem("dmails", JSON.stringify(dmailsNow));
+                });
+                localStorage.setItem("dmails", JSON.stringify(latest));
                 renderMessages();
             }, 1500);
         }
     });
 
-    if (updated) {
+    // Save once if we changed any "replied" flags
+    if (needsUpdate) {
         localStorage.setItem("dmails", JSON.stringify(dmails));
     }
 }
 
-// Clear messages with fade-out
+// Clear messages with fade-out animation
 clearBtn.addEventListener("click", () => {
     const messages = document.querySelectorAll(".message");
     messages.forEach(msg => {
