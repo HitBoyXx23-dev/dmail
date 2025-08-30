@@ -1,21 +1,27 @@
 const chatWindow = document.getElementById("chatWindow");
 
-// Clear old messages on page load
+// Clear messages on reload
 localStorage.setItem("dmails", JSON.stringify([]));
 
 let lastSentCount = 0;
 
-function renderMessages(){
+function renderMessages() {
     chatWindow.innerHTML = "";
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
 
-    // Sort by timestamp
-    dmails.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+    dmails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-    dmails.forEach(dmail => {
+    dmails.forEach((dmail, index) => {
         const div = document.createElement("div");
-        div.classList.add("message");
-        div.classList.add(dmail.type);
+        div.classList.add("message", dmail.type);
+
+        // Add the time-travel animation only for new messages
+        if (!dmail.animated) {
+            div.classList.add("animate");
+            dmails[index].animated = true;
+            localStorage.setItem("dmails", JSON.stringify(dmails));
+        }
+
         div.innerHTML = `<strong>${dmail.recipient}:</strong> ${dmail.message}<br><em>${dmail.timestamp}</em>`;
         chatWindow.appendChild(div);
     });
@@ -23,8 +29,7 @@ function renderMessages(){
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// Only reply to newly sent messages
-function simulateReplies(){
+function simulateReplies() {
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
     const sentMessages = dmails.filter(m => m.type === "sent");
 
@@ -36,7 +41,8 @@ function simulateReplies(){
                 recipient: "You",
                 message: `Reply to ${msg.recipient}: I received your D-Mail!`,
                 timestamp: new Date().toLocaleString(),
-                type: "received"
+                type: "received",
+                animated: false // mark for animation
             };
             const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
             dmailsNow.push(reply);
@@ -50,6 +56,4 @@ function simulateReplies(){
 
 renderMessages();
 simulateReplies();
-
-// Check periodically for new messages
 setInterval(simulateReplies, 2000);
