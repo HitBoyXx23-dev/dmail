@@ -6,29 +6,19 @@ form.addEventListener("submit", function(e){
 
     const recipient = document.getElementById("recipient").value.trim();
     const message = document.getElementById("message").value.trim();
-    const timestampInput = document.getElementById("timestamp").value;
+    let timestamp = document.getElementById("timestamp").value.trim();
 
     if(!recipient || !message){
         status.textContent = "Fill all fields!";
         return;
     }
 
-    // Correctly parse timestamp
-    let timestamp;
-    if(timestampInput){
-        let tString = timestampInput;
-        if(tString.length === 16){ tString += ":00"; } // Append seconds
-        const t = new Date(tString);
-        if(isNaN(t.getTime())){
-            status.textContent = "Invalid timestamp!";
-            return;
-        }
-        timestamp = t.toLocaleString();
-    } else {
+    // If no timestamp entered, use current time
+    if(!timestamp){
         timestamp = new Date().toLocaleString();
     }
 
-    // Add to localStorage
+    // Add D-Mail to localStorage
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
     dmails.push({recipient, message, timestamp, type: "sent"});
     localStorage.setItem("dmails", JSON.stringify(dmails));
