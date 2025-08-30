@@ -54,6 +54,12 @@ function simulateReplies() {
     lastSentCount = sentMessages.length;
 }
 
+// Automatically clear all D-Mails after 2 minutes (120,000 ms)
+setTimeout(() => {
+    localStorage.setItem("dmails", JSON.stringify([]));
+    renderMessages();
+}, 120000); // 2 minutes
+
 renderMessages();
 simulateReplies();
 setInterval(simulateReplies, 2000);
