@@ -34,7 +34,7 @@ function simulateReplies(){
         setTimeout(() => {
             const reply = {
                 recipient: "You",
-                message: `Reply from ${msg.recipient}: I received your D-Mail!`,
+                message: `Reply to ${msg.recipient}: I received your D-Mail!`,
                 timestamp: new Date().toLocaleString(),
                 type: "received"
             };
