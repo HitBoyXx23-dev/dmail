@@ -1,5 +1,10 @@
 const chatWindow = document.getElementById("chatWindow");
 
+// Clear old messages on page load
+localStorage.setItem("dmails", JSON.stringify([]));
+
+let lastSentCount = 0;
+
 function renderMessages(){
     chatWindow.innerHTML = "";
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
@@ -18,31 +23,33 @@ function renderMessages(){
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// Simulate auto-reply only for messages that haven't been replied to
+// Only reply to newly sent messages
 function simulateReplies(){
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
+    const sentMessages = dmails.filter(m => m.type === "sent");
 
-    dmails.forEach((msg, index) => {
-        if(msg.type === "sent" && !msg.replied){
-            // Mark as replied to prevent duplicate replies
-            dmails[index].replied = true;
-            localStorage.setItem("dmails", JSON.stringify(dmails));
+    const newMessages = sentMessages.slice(lastSentCount);
 
-            setTimeout(() => {
-                const reply = {
-                    recipient: "You",
-                    message: `Reply from ${msg.recipient}: I received your D-Mail!`,
-                    timestamp: new Date().toLocaleString(),
-                    type: "received"
-                };
-                const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
-                dmailsNow.push(reply);
-                localStorage.setItem("dmails", JSON.stringify(dmailsNow));
-                renderMessages();
-            }, 1500);
-        }
+    newMessages.forEach((msg) => {
+        setTimeout(() => {
+            const reply = {
+                recipient: "You",
+                message: `Reply from ${msg.recipient}: I received your D-Mail!`,
+                timestamp: new Date().toLocaleString(),
+                type: "received"
+            };
+            const dmailsNow = JSON.parse(localStorage.getItem("dmails") || "[]");
+            dmailsNow.push(reply);
+            localStorage.setItem("dmails", JSON.stringify(dmailsNow));
+            renderMessages();
+        }, 1500);
     });
+
+    lastSentCount = sentMessages.length;
 }
 
 renderMessages();
 simulateReplies();
+
+// Check periodically for new messages
+setInterval(simulateReplies, 2000);
