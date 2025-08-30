@@ -1,20 +1,26 @@
 const chatWindow = document.getElementById("chatWindow");
+const clearBtn = document.getElementById("clearBtn");
 
-// Clear messages on reload
-localStorage.setItem("dmails", JSON.stringify([]));
-
+// Track how many sent messages exist to only reply to new ones
 let lastSentCount = 0;
+
+// Initialize dmails in localStorage if not present
+if (!localStorage.getItem("dmails")) {
+    localStorage.setItem("dmails", JSON.stringify([]));
+}
 
 function renderMessages() {
     chatWindow.innerHTML = "";
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
 
+    // Sort by timestamp
     dmails.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     dmails.forEach((dmail, index) => {
         const div = document.createElement("div");
         div.classList.add("message", dmail.type);
 
+        // Only animate new messages
         if (!dmail.animated) {
             div.classList.add("animate");
             dmails[index].animated = true;
@@ -28,13 +34,13 @@ function renderMessages() {
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
+// Simulate auto-replies for new sent messages
 function simulateReplies() {
     const dmails = JSON.parse(localStorage.getItem("dmails") || "[]");
     const sentMessages = dmails.filter(m => m.type === "sent");
-
     const newMessages = sentMessages.slice(lastSentCount);
 
-    newMessages.forEach((msg) => {
+    newMessages.forEach(msg => {
         setTimeout(() => {
             const reply = {
                 recipient: "You",
@@ -53,11 +59,19 @@ function simulateReplies() {
     lastSentCount = sentMessages.length;
 }
 
-// Button to clear D-Mails manually
-const clearBtn = document.getElementById("clearBtn");
+// Clear D-Mails with fade-out
 clearBtn.addEventListener("click", () => {
-    localStorage.setItem("dmails", JSON.stringify([]));
-    renderMessages();
+    const messages = document.querySelectorAll(".message");
+    messages.forEach(msg => {
+        msg.style.animation = "fadeOut 0.5s forwards";
+    });
+
+    // Wait for animation to finish before clearing storage
+    setTimeout(() => {
+        localStorage.setItem("dmails", JSON.stringify([]));
+        renderMessages();
+        lastSentCount = 0;
+    }, 500);
 });
 
 renderMessages();
